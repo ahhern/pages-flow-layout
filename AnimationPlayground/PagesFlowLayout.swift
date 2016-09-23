@@ -33,10 +33,15 @@ class PagesFlowLayout : UICollectionViewFlowLayout {
     fileprivate var layoutInformation : [NSObject : AnyObject] = [:]
     fileprivate var lastKnownOffset : CGPoint = CGPoint(x: 0, y: 0)
     
-    fileprivate var currentIndex : Int {
-        let width = self.itemSize.width + self.minimumLineSpacing
-        let currentOffset = self.collectionView!.contentOffset.x
-        return Int(currentOffset/width)
+    fileprivate var currentIndex : Int = 0
+//    {
+//        let width = self.itemSize.width + self.minimumLineSpacing
+//        let currentOffset = self.collectionView!.contentOffset.x
+//        return Int(currentOffset/width)
+//    }
+    
+    fileprivate var maxIndex : Int {
+        return self.collectionView!.numberOfItems(inSection: 0) - 1
     }
     
 
@@ -50,38 +55,42 @@ extension PagesFlowLayout {
 
     override func prepare() {
         super.prepare()
-        
+        self.collectionView?.decelerationRate = UIScrollViewDecelerationRateFast
         self.itemSize = customItemSize
-        self.minimumLineSpacing = UIScreen.main.bounds.size.width
-//        self.collectionView?.isPagingEnabled = true
+        self.minimumLineSpacing = (2/3)*UIScreen.main.bounds.size.width
         self.scrollDirection = .horizontal
         
     }
     
     override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
-        return proposedContentOffset
+        let delta = velocity.x < CGFloat(0) ? -1 : 1
+        let newIndex = min(self.maxIndex, max(self.currentIndex + delta, 0))
+        self.currentIndex = newIndex
+        return CGPoint(x: self.makeTargetContentOffsetForItem(atIndex: newIndex), y: proposedContentOffset.y)
     }
     
+    
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        print(#function + "\(rect)")
-        
         
         let attributes : [UICollectionViewLayoutAttributes] = super.layoutAttributesForElements(in: rect)!
         
-        
         for attr in attributes {
-            if rect.intersects(attr.frame) {
-                print(attr.frame)
-                attr.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI_4)/2)
+            let frame = attr.frame
+            if rect.intersects(frame) {
+                attr.transform = self.getAffineTransformForItem(withAttributes: attr, scrollingDirectionType: self.scrollDirectionType)
             }
         }
         
+        self.lastKnownOffset = self.collectionView!.contentOffset
         return attributes//super.layoutAttributesForElements(in: rect)
     }
     
+
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         print(#function)
-        return super.layoutAttributesForItem(at: indexPath)
+        guard let attr = super.layoutAttributesForItem(at: indexPath) else { return nil }
+        attr.transform = self.getAffineTransformForItem(withAttributes: attr, scrollingDirectionType: self.scrollDirectionType)
+        return attr
     }
     
     
@@ -90,6 +99,55 @@ extension PagesFlowLayout {
     }
     
 }
+
+
+extension PagesFlowLayout {
+    
+    fileprivate func makeTargetContentOffsetForItem(atIndex index: Int) -> CGFloat {
+        let attr = self.layoutAttributesForItem(at: NSIndexPath(item: index, section: 0) as IndexPath)
+        return attr!.center.x - 160
+    }
+    
+    fileprivate func getAffineTransformForItem(withAttributes attributes: UICollectionViewLayoutAttributes, scrollingDirectionType : ScrollDirectionType ) -> CGAffineTransform {
+        
+        
+        let contentOffsetX     = self.collectionView!.contentOffset.x
+        let collectionViewSize = self.collectionView!.frame.size
+        let visibleRect = CGRect(origin: CGPoint(x: contentOffsetX, y: 0 ), size: collectionViewSize)
+        
+        let maxAngle = CGFloat(M_PI/18) //36
+        let minAngle = -maxAngle
+        
+        var angle : CGFloat
+        let delta = fabs(visibleRect.midX - attributes.frame.midX)
+        let maxDistance = collectionViewSize.width/2
+        
+        
+        if delta >= maxDistance {
+            angle = scrollingDirectionType == .left ? maxAngle : minAngle
+        }
+        else {
+            let sign : CGFloat = scrollingDirectionType == .left ? 1 : -1
+            angle = sign*maxAngle*(delta/maxDistance)
+        }
+        
+        if angle == 0 {
+            print("\(delta)")
+        }
+        
+        print(delta)
+        
+        
+        let editingItemIndexPath = attributes.indexPath
+        if self.currentIndex == editingItemIndexPath.item {
+            //
+        }
+        
+        return CGAffineTransform(rotationAngle: angle)
+    }
+}
+
+
 
 
 

@@ -39,6 +39,7 @@ class PagesCollectionViewController : UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.registerCells()
+        self.collectionView?.backgroundColor = UIColor.white
         self.collectionView?.reloadData()
     }
     
@@ -68,7 +69,7 @@ extension PagesCollectionViewController {
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 4
+        return 50
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -110,7 +111,7 @@ class PageCollectionViewCell : UICollectionViewCell {
     }
     
     func configure(){
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = UIColor.red
         self.layer.cornerRadius = 10.0
     }
 }
