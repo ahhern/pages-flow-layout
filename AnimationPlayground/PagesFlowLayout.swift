@@ -34,11 +34,6 @@ class PagesFlowLayout : UICollectionViewFlowLayout {
     fileprivate var lastKnownOffset : CGPoint = CGPoint(x: 0, y: 0)
     
     fileprivate var currentIndex : Int = 0
-//    {
-//        let width = self.itemSize.width + self.minimumLineSpacing
-//        let currentOffset = self.collectionView!.contentOffset.x
-//        return Int(currentOffset/width)
-//    }
     
     fileprivate var maxIndex : Int {
         return self.collectionView!.numberOfItems(inSection: 0) - 1
@@ -110,18 +105,19 @@ extension PagesFlowLayout {
     
     fileprivate func getAffineTransformForItem(withAttributes attributes: UICollectionViewLayoutAttributes, scrollingDirectionType : ScrollDirectionType ) -> CGAffineTransform {
         
-        
         let contentOffsetX     = self.collectionView!.contentOffset.x
         let collectionViewSize = self.collectionView!.frame.size
         let visibleRect = CGRect(origin: CGPoint(x: contentOffsetX, y: 0 ), size: collectionViewSize)
         
-        let maxAngle = CGFloat(M_PI/18) //36
+        let maxOffsetY = CGFloat(10)
+        let maxAngle = CGFloat(M_PI/18)
         let minAngle = -maxAngle
         
         var angle : CGFloat
+        var offsetY = CGFloat(0)
+        
         let delta = fabs(visibleRect.midX - attributes.frame.midX)
         let maxDistance = collectionViewSize.width/2
-        
         
         if delta >= maxDistance {
             angle = scrollingDirectionType == .left ? maxAngle : minAngle
@@ -131,25 +127,16 @@ extension PagesFlowLayout {
             angle = sign*maxAngle*(delta/maxDistance)
         }
         
-        if angle == 0 {
-            print("\(delta)")
+        if delta <= maxDistance/2 {
+            offsetY = maxOffsetY*((2*delta)/maxDistance)
         }
-        
-        print(delta)
-        
-        
-        let editingItemIndexPath = attributes.indexPath
-        if self.currentIndex == editingItemIndexPath.item {
-            //
+        else if delta < maxDistance{
+            offsetY = maxOffsetY*(maxDistance/(2*delta))
         }
-        
-        return CGAffineTransform(rotationAngle: angle)
+    
+        return CGAffineTransform(rotationAngle: angle).translatedBy(x: 0, y: offsetY)
     }
 }
-
-
-
-
 
 
 
