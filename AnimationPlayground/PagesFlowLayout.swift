@@ -58,8 +58,9 @@ extension PagesFlowLayout {
     }
     
     override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
+        
         let delta = velocity.x < CGFloat(0) ? -1 : 1
-        let newIndex = min(self.maxIndex, max(self.currentIndex + delta, 0))
+        let newIndex = fabs(velocity.x) < 0.5 ? self.currentIndex : min(self.maxIndex, max(self.currentIndex + delta, 0))
         self.currentIndex = newIndex
         return CGPoint(x: self.makeTargetContentOffsetForItem(atIndex: newIndex), y: proposedContentOffset.y)
     }
@@ -130,10 +131,10 @@ extension PagesFlowLayout {
         if delta <= maxDistance/2 {
             offsetY = maxOffsetY*((2*delta)/maxDistance)
         }
-        else if delta < maxDistance{
+        else {
             offsetY = maxOffsetY*(maxDistance/(2*delta))
         }
-    
+        
         return CGAffineTransform(rotationAngle: angle).translatedBy(x: 0, y: offsetY)
     }
 }
