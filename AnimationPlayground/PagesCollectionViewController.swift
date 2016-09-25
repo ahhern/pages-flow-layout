@@ -57,13 +57,20 @@ extension PagesCollectionViewController {
 
 
 //MARK: - Delegate
-extension PagesCollectionViewController {
+extension PagesCollectionViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return self.itemSize
+    }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return self.sectionInsets
+    }
 }
 
 
 //MARK: - Datasource
 extension PagesCollectionViewController {
+    
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -78,19 +85,6 @@ extension PagesCollectionViewController {
         return cell
     }
 }
-
-extension PagesCollectionViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return self.itemSize
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return self.sectionInsets
-    }
-    
-}
-
-
 
 class PageCollectionViewCell : UICollectionViewCell {
     
