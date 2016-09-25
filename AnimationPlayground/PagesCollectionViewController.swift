@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-
+/// Sample collection view controller that uses `PagesFlowLayout.`
 class PagesCollectionViewController : UICollectionViewController {
 
     fileprivate var itemInsets : UIEdgeInsets {
@@ -33,25 +33,31 @@ class PagesCollectionViewController : UICollectionViewController {
     }
     
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        //fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.registerCells()
-        self.collectionView?.backgroundColor = UIColor.white
+        self.configureUI()
         self.collectionView?.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
-
+    
 }
 
 extension PagesCollectionViewController {
     fileprivate func registerCells(){
         self.collectionView?.register(PageCollectionViewCell.self, forCellWithReuseIdentifier: PageCollectionViewCell.identifier)
+    }
+    
+    fileprivate func configureUI(){
+        self.collectionView?.backgroundColor = UIColor.white
+        self.title = "Pages"
     }
 }
 
